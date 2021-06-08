@@ -1,7 +1,8 @@
 # PROJECT OF COLORMETER
 
-## Digital Integrated Circuits and Microcontrollers Project
+## Digital Integrated Circuits and Microcontrollers Project with Arduino
 
+Detecting color with Arduino.
 
 ## Bibliography
 
