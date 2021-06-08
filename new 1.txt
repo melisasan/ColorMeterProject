@@ -1,0 +1,97 @@
+Renk Tanıma Yazılımı
+
+
+int kirmizi=11;
+int yesil=10;
+int mavi=6;
+int S2=7;
+int S3=8;
+int outpin=4;
+int kirmizi_algilama;
+int yesil_algilama;
+int mavi_algilama;
+unsigned int pulseWidth;
+ 
+void setup() {
+Serial.begin(9600);
+pinMode(kirmizi, OUTPUT);
+pinMode(yesil, OUTPUT);
+pinMode(mavi, OUTPUT);
+pinMode(S2, OUTPUT);
+pinMode(S3, OUTPUT);
+pinMode(outpin, OUTPUT);
+ 
+}
+ 
+void loop() {
+digitalWrite(S2,LOW);
+digitalWrite(S3,LOW);
+pulseWidth = pulseIn(outpin,LOW);
+kirmizi_algilama = pulseWidth/400. -1;
+kirmizi_algilama = (255- kirmizi_algilama);
+digitalWrite(S2,HIGH);
+digitalWrite(S3,HIGH);
+pulseWidth = pulseIn(outpin,LOW);
+yesil_algilama = pulseWidth/400. -1;
+yesil_algilama = (255- yesil_algilama);
+digitalWrite(S2,LOW);
+digitalWrite(S3,HIGH);
+pulseWidth = pulseIn(outpin,LOW);
+mavi_algilama = pulseWidth/400. -1;
+mavi_algilama = (255- mavi_algilama);
+ 
+if(kirmizi_algilama > yesil_algilama && yesil_algilama > mavi_algilama){
+kirmizi_algilama =255;
+yesil_algilama = yesil_algilama/2;
+mavi_algilama = 0;
+ 
+}
+if(kirmizi_algilama > mavi_algilama && mavi_algilama > yesil_algilama){
+kirmizi_algilama = 255;
+mavi_algilama = mavi_algilama/2;
+yesil_algilama = 0;
+ 
+}
+if(yesil_algilama > kirmizi_algilama && kirmizi_algilama > mavi_algilama){
+yesil_algilama =255;
+kirmizi_algilama = kirmizi_algilama/2;
+mavi_algilama = 0;
+ 
+}
+if(yesil_algilama > mavi_algilama && mavi_algilama > kirmizi_algilama){
+yesil_algilama =255;
+mavi_algilama = mavi_algilama/2;
+kirmizi_algilama = 0;
+ 
+}
+if(mavi_algilama > kirmizi_algilama && kirmizi_algilama > yesil_algilama){
+mavi_algilama =255;
+kirmizi_algilama = kirmizi_algilama/2;
+yesil_algilama = 0;
+ 
+}
+if(mavi_algilama > yesil_algilama && yesil_algilama > kirmizi_algilama){
+mavi_algilama =255;
+yesil_algilama = yesil_algilama/2;
+kirmizi_algilama = 0;
+ 
+}
+ 
+mavi_algilama =mavi_algilama *.5;
+yesil_algilama = yesil_algilama * .75;
+Serial.print(kirmizi_algilama);
+Serial.print(" , ");
+Serial.print(yesil_algilama);
+Serial.print(" , ");
+Serial.print(mavi_algilama);
+Serial.print(" , ");
+analogWrite(kirmizi, kirmizi_algilama);
+analogWrite(yesil,yesil_algilama);
+analogWrite(mavi, mavi_algilama);
+ 
+delay(250);
+ 
+}
+
+
+----------------------------------------------------------------------------------------

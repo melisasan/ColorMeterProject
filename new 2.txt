@@ -1,0 +1,152 @@
+
+// ProjeHocam - Robimek , Renk Algılama Uygulaması
+// Coder : Sezgin Gül
+#include <Servo.h> // Servo motor kütüphanesi
+#include "Wire.h" // I2C iletişim protokolü kütüphanesi
+#include "Adafruit_TCS34725.h" // Renk sensörü kütüphanesi
+#include <LiquidCrystal_I2C.h> // Lcd kütüphanesi
+LiquidCrystal_I2C lcd(0x27,16,2); // Lcd tanımlama
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAN_1X); // Renk sensörü tanımlama
+Servo renk_gosterge; // Servo motor tanımlama
+ 
+unsigned int kirmizi_led = 3; // Rgb kırmızı pin
+unsigned int mavi_led = 4; // Rgb mavi pin
+unsigned int yesil_led = 5; // Rgb yeşil pin
+ 
+uint16_t temizle, kirmizi, yesil, mavi; // Renk değerleri için tanımlamalar
+float ortalama, r, g, b; // renk hesaplamaları için tanımlamalar
+ 
+int kirmizi_aci = 30; // Servo motor kırmızı renk gösterge açısı
+int yesil_aci = 90; // Servo motor yeşil renk gösterge açısı
+int mavi_aci = 150; // Servo motor mavi renk gösterge açısı
+int renksiz = 0; // Servo motor tanımsız renk gösterge açısı
+ 
+void setup() { // pinlerin çıkış ve giriş ayarları ve tanımlamaları
+   
+lcd.init();  // lcd yükleme
+lcd.backlight(); // lcd ışık ayarı
+Serial.begin(9600); // serial iletişim hızı
+ renk_gosterge.attach(9); // servo motor 9. dijital pin tanımlaması
+  
+if (tcs.begin()) { // renk sensörüne bağlandıysa veri almaya başla
+ // lcd ye mesaj gönder
+ lcd.setCursor(0, 1); 
+lcd.print("Renk Gostergesi");
+} else { // renk sensörüne bağlanmadıysa 
+  // lcd ye mesaj gönder
+   lcd.setCursor(0, 1);
+lcd.print("baglanti hatasi!");
+while (1); // yeniden bağlanmaya çalış
+}
+delay(1000); // 1 saniye bekle
+ lcd.clear(); // lcd yi temizle
+  // led pinlerini çıkış olarak ayarla
+ pinMode(kirmizi_led, OUTPUT);
+  pinMode(mavi_led, OUTPUT);
+   pinMode(yesil_led, OUTPUT);
+   // başlangıçta led sönük ayarla
+   digitalWrite(kirmizi_led,HIGH);
+  digitalWrite(yesil_led,HIGH);
+  digitalWrite(mavi_led,HIGH);
+}
+void loop() { // sonsuz döngü
+    
+Renk_oku(); // Renk oku algoritmasını çalıştır
+Rengi_goster(); // Renk göster algoritmasını çalıştır
+delay(500); // 500 milisaniye bekle
+}
+ 
+void Renk_oku() // Renk okuma algoritması
+{
+tcs.getRawData(&kirmizi, &yesil, &mavi, &temizle); // renk sensöründen gelen değerleri al
+  
+ortalama = (kirmizi+yesil+mavi)/3; // renk değerlerini topla ve ortalamasını al
+r = kirmizi/ortalama; // kırmızı renk değeri oranı
+g = yesil/ortalama; // yeşil renk değeri oranı
+b = mavi/ortalama; // mavi renk değeri oranı
+ 
+ lcd.setCursor(0,0); // lcd ekran ilk satır ve sutununa  "r" yaz
+lcd.print("r"); //
+lcd.setCursor(1,0); // lcd ekran ilk satır ve ikinci sutununa  r nin değerini yaz
+lcd.print(r);
+ lcd.setCursor(5,0); // lcd ekran ilk satır ve 5.sutununa  "g" yaz
+lcd.print("g:");
+lcd.setCursor(7,0); // lcd ekran ilk satır ve 7.sutununa  g değerini yaz
+lcd.print(g);
+ lcd.setCursor(11,0); // lcd ekran ilk satır ve 11.sutununa  "b" yaz
+lcd.print("b:");
+lcd.setCursor(13,0); // lcd ekran ilk satır ve 11.sutununa  b değerini yaz
+lcd.print(b);
+}
+ 
+void Rengi_goster() // Renk gösterme algoritması
+{
+if ((r > 1.4) && (g < 0.9) && (b < 0.9)) { // kırmızı renk olma durumu
+  renk_gosterge.write(kirmizi_aci); // servo motor kırmızı rengi göster
+lcd.setCursor(0,1); // lcd ekran 2.satıra kırmızı renk yaz
+lcd.print("Kirmizi Renk");
+kirmizi_yak(); // kırmızı led yak
+}
+else if ((r < 0.95) && (g > 1.4) && (b < 0.9)) {  // yeşil renk olma durumu
+  renk_gosterge.write(yesil_aci); // servo motor yeşil rengi göster
+  lcd.setCursor(0,1); // lcd ekran 2.satıra yeşil renk yaz
+lcd.print("Yesil Renk"); // yeşil led yak
+yesil_yak();
+} 
+else if ((r < 0.8) && (g < 1.2) && (b > 1.2)) { // mavi renk olma durumu
+   renk_gosterge.write(mavi_aci); // servo motor mavi rengi göster
+lcd.setCursor(0,1); // lcd ekran 2.satıra mavi renk yaz
+lcd.print("Mavi Renk");
+mavi_yak(); // mavi led yak
+ 
+}
+else { // tanımlı renkler değilse 
+lcd.setCursor(0,1);  // lcd ekran 2.satıra birşey yazma
+lcd.print("               ");
+renk_gosterge.write(renksiz); // servo motor tanımız pozisyona al
+led_kapat(); // ledi kapat
+}
+}
+ 
+ 
+void kirmizi_yak() // kırmızı renk tanımı
+{
+  digitalWrite(kirmizi_led,LOW);
+  digitalWrite(yesil_led,HIGH);
+  digitalWrite(mavi_led,HIGH);
+}
+void mavi_yak() // mavi renk tanımı
+{
+  digitalWrite(kirmizi_led,HIGH);
+  digitalWrite(yesil_led,HIGH);
+  digitalWrite(mavi_led,LOW);
+}
+void yesil_yak() // yeşil renk tanımı
+{
+  digitalWrite(kirmizi_led,HIGH);
+  digitalWrite(yesil_led,LOW);
+  digitalWrite(mavi_led,HIGH);
+}
+void led_kapat() // ledi söndür
+{
+   digitalWrite(kirmizi_led,HIGH);
+  digitalWrite(yesil_led,HIGH);
+  digitalWrite(mavi_led,HIGH);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
