@@ -1,9 +1,7 @@
 
 # PROJECT OF COLORMETER
 
-[!image] [resim]
-
-[resim]:  https://www.projehocam.com/wp-content/uploads/renkalgilama-devresi.jpg
+[!image] (https://www.projehocam.com/wp-content/uploads/renkalgilama-devresi.jpg)
 
 ## Digital Integrated Circuits and Microcontrollers Project with Arduino
 
